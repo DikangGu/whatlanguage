@@ -2,22 +2,47 @@
 import java.security.MessageDigest
 
 class BloomFilter (val size: Int) {  
-	lazy val bitField = {
+	val hashCount = 5       
+	var wordCount = 0
+	
+	val bitField = {
 		new BitField(size)
+	}             
+	
+    val hashFunc = new MurmurHashable().hashes(hashCount)(size) _ 
+	
+	private def hashs(item: String): Array[Int] = {  
+		val word = item.toLowerCase.trim  
+		hashFunc(item)
 	}   
 	
-	def hashs(item: String): List[Int] = {  
-		val word = item.toLowerCase.trim
-		println(word)
-		List(1, 2, 3)
-	}    
+	def add(item: String) {                  
+		hashs(item).foreach( bitField.set(_, 1)) 
+		wordCount = wordCount + 1                  
+	} 
 	
-	def md5(s: String) = {
-		MessageDigest.getInstance("MD5").digest(s.getBytes)
-	}
-	
-	def add(item: String) {
+	def contains(item:String): Boolean = {  
+		var count = 0
+		hashs(item).foreach( (x) => {
+			if (bitField.get(x) == 1) {
+				count = count + 1
+			}
+		})                       
 		
+		count == hashCount
+	}
+} 
+
+trait Hashable {
+	def hashes(hashCount: Int)(max: Int)(value: String): Array[Int]
+}                                                                  
+
+class MurmurHashable extends Hashable {
+	def hashes(hashCount: Int)(max: Int)(value: String): Array[Int] = {
+		val hash1 = MurmurHash.hash(value.getBytes, 0)
+		val hash2 = MurmurHash.hash(value.getBytes, hash1)
+		
+		(for (i<- 0 until hashCount) yield scala.math.abs((hash1 + i*hash2) % max)).toArray
 	}
 }
 
@@ -36,10 +61,11 @@ object BloomFilter {
 	}
 	
 	def main(args: Array[String]) {    
-		
+		              
+		println(Integer.MAX_VALUE)
 		val filter  = new BloomFilter(200)
-		println(filter.hashs(" AbC"))     
-		println(filter.md5("abc"))
+		filter.add("abc")   
+		println(filter.contains("abd"))
 		
 	}
 	

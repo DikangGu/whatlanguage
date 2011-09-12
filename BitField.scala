@@ -1,8 +1,8 @@
 
 class BitField (val size: Int) {   
-	val ELEMENT_WIDTH = 32
+	val ELEMENT_WIDTH = 31
 	lazy val field = {
-		println((size-1) / ELEMENT_WIDTH + 1)
+	   // println((size-1) / ELEMENT_WIDTH + 1)
 		new Array[Int] ((size-1) / ELEMENT_WIDTH + 1)   
 	}    
 	
@@ -16,12 +16,12 @@ class BitField (val size: Int) {
 		}
 	}    
 	
-	def set(position: Int, value: Int) {          
+	def set(position: Int, value: Int) {    
 		if (value == 1) {
 			field(position/ELEMENT_WIDTH) |= (1<<(position % ELEMENT_WIDTH))
 		} else {                                                            
 			field(position/ELEMENT_WIDTH) ^= (1<<(position % ELEMENT_WIDTH))
-		}
+		} 
 	} 
 	
 	def to_s:String = {  
